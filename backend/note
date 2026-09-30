@@ -1,0 +1,13 @@
+git checkout -b "branchname"
+git push origin "branchname
+
+git checkout -b "feat/1"
+work work work
+add.
+commit
+git push origin feat/1
+then pull request
+
+add desc in pull request github
+
+create pull request
