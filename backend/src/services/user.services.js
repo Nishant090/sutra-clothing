@@ -140,3 +140,22 @@ export const refresh = async(userId,token)=>{
    }
 
 }
+
+
+export const logout = async (refreshToken) => {
+  if (!refreshToken) {
+    return;
+  }
+
+  await RefreshToken.updateOne(
+    {
+      token: refreshToken,
+      revokedAt: null,
+    },
+    {
+      $set: {
+        revokedAt: new Date(),
+      },
+    }
+  );
+};

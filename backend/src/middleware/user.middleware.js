@@ -11,7 +11,7 @@ export const protect = async (req, res, next) => {
       throw new AppError("Not Authorized", 401);
     }
 
-    const decoded = jwt.verify(token, env.jwtSecret);
+    const decoded = jwt.verify(token, env.jwtSecretAccess);
     const user = await User.findById(decoded.id);
 
     if (!user) {

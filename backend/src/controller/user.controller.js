@@ -133,5 +133,32 @@ export const refresh = async (req, res, next) => {
     next(err);
   }
 };
-// export const refreshToken // gengerate acces and refesh
-// // //make expries this refresh token by adding revoked at
+export const logout = async (req, res, next) => {
+  const refreshToken = req.cookies?.refreshToken;
+
+  // Use the same cookie options used when setting the tokens.
+  const cookieOptions = {
+    httpOnly: true,
+    sameSite: "strict",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+  };
+
+  try {
+    await authServices.logout(refreshToken);
+
+    res.clearCookie("accessToken", cookieOptions);
+    res.clearCookie("refreshToken", cookieOptions);
+
+    return res.status(200).json({
+      success: true,
+      message: "Logged out successfully",
+    });
+  } catch (error) {
+    // Clear browser cookies even if token revocation fails.
+    res.clearCookie("accessToken", cookieOptions);
+    res.clearCookie("refreshToken", cookieOptions);
+
+    return next(error);
+  }
+};
