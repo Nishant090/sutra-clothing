@@ -6,7 +6,7 @@ export const generateAccessToken = async (userId) => {
     {
       id: userId,
     },
-    env.jwtSecret,
+    env.jwtSecretAccess,
     { expiresIn: "15m" },
   );
 };
@@ -17,7 +17,7 @@ export const generateRefreshToken = async (userId) => {
     {
       id: userId,
     },
-    env.jwtSecret,
+    env.jwtSecretRefresh,
     { expiresIn: "7d" },
   );
 };

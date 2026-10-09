@@ -89,7 +89,11 @@ export const getMe = async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    user,
+      user: {
+      id: user._id.toString(),
+      name: user.name,
+      email: user.email,
+    },
   });
 };
 
