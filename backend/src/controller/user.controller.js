@@ -1,5 +1,6 @@
 import * as authServices from "../services/user.services.js";
 import RefreshToken from "../models/refreshToken.model.js";
+import { AppError } from "../utils/appError.js";
 
 export const register = async (req, res, next) => {
   try {
@@ -85,7 +86,14 @@ export const verifyEmail = async (req, res, next) => {
 };
 
 export const getMe = async (req, res, next) => {
-  const user = req.user;
+  try {
+    const user = req.user;
+
+    if(!user){
+      throw new AppError("User not authenticated",401)
+    }
+    console.log(user)
+  
 
   res.status(200).json({
     success: true,
@@ -95,39 +103,47 @@ export const getMe = async (req, res, next) => {
       email: user.email,
     },
   });
+    
+  } catch (error) {
+    next(error)
+    
+  }
+  
 };
 
 export const refresh = async (req, res, next) => {
   try {
-    const user = req.user;
-    const token  = req.cookies.refreshToken;
+    const token = req.cookies?.refreshToken;
 
-    const { accessToken, refreshToken } = await authServices.refresh(
-      user._id,
-      token,
-    );
+    const { userId, accessToken, refreshToken } =
+      await authServices.refresh(token);
+
     await RefreshToken.create({
-      userId: user.id,
+      userId,
       token: refreshToken,
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
     });
 
-    res.cookie("accessToken", accessToken, {
+    const cookieOptions = {
       httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
+      path: "/",
+    };
+
+    res.cookie("accessToken", accessToken, {
+      ...cookieOptions,
       maxAge: 15 * 60 * 1000,
     });
 
     res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      sameSite: "strict",
+      ...cookieOptions,
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    res.status(200).json({
-      refreshToken,
-      accessToken,
-      user,
+    return res.status(200).json({
+      success: true,
+      message: "Tokens refreshed successfully",
     });
   } catch (err) {
     next(err);

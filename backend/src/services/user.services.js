@@ -103,43 +103,54 @@ export const verifyEmail = async (token) => {
 };
 
 
-export const refresh = async(userId,token)=>{
-     
-  if(!token){
-    throw new AppError("Refresh token is required",401)
+export const refresh = async (token) => {
+  if (!token) {
+    throw new AppError("Refresh token is required", 401);
   }
 
-  const storedToken= await RefreshToken.findOne({
-    token,
-    userId
-  })
+  const storedToken = await RefreshToken.findOne({ token });
 
-  if(!storedToken){
-    throw new AppError("Invalid refresh token",401)
+  if (!storedToken) {
+    throw new AppError("Invalid refresh token", 401);
   }
 
-  if(storedToken.revokedAt){
-    throw new AppError("Refresh token has already been revoked",401)
+  if (storedToken.revokedAt) {
+    throw new AppError("Refresh token has already been revoked", 401);
   }
 
+  const now = new Date();
 
-  if(storedToken.expiresAt < new Date()){
-    throw new AppError("Refresh token has been expired",401)
+  if (storedToken.expiresAt <= now) {
+    throw new AppError("Refresh token has expired", 401);
   }
 
-  storedToken.revokedAt= new Date()
+  // Atomically revoke the old token to prevent concurrent reuse.
+  const revokedToken = await RefreshToken.updateOne(
+    {
+      _id: storedToken._id,
+      revokedAt: null,
+      expiresAt: { $gt: now },
+    },
+    {
+      $set: { revokedAt: now },
+    },
+  );
 
-  await storedToken.save()
+  if (revokedToken.modifiedCount !== 1) {
+    throw new AppError("Refresh token is no longer valid", 401);
+  }
 
-  const newAccessToken = await generateAccessToken(userId);
-  const newRefeshToken = await generateRefreshToken(userId)
+  const userId = storedToken.userId;
 
-   return{
-    accessToken:newAccessToken,
-    refresh:newRefeshToken
-   }
+  const accessToken = await generateAccessToken(userId);
+  const refreshToken = await generateRefreshToken(userId);
 
-}
+  return {
+    userId,
+    accessToken,
+    refreshToken,
+  };
+};
 
 
 export const logout = async (refreshToken) => {
