@@ -102,7 +102,6 @@ export const verifyEmail = async (token) => {
   return user;
 };
 
-
 export const refresh = async (token) => {
   if (!token) {
     throw new AppError("Refresh token is required", 401);
@@ -151,7 +150,6 @@ export const refresh = async (token) => {
     refreshToken,
   };
 };
-
 
 export const logout = async (refreshToken) => {
   if (!refreshToken) {

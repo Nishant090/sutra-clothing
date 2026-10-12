@@ -7,7 +7,7 @@ export const generateAccessToken = async (userId) => {
       id: userId,
     },
     env.jwtSecretAccess,
-    { expiresIn: "1m" },
+    { expiresIn: "30s" },
   );
 };
 

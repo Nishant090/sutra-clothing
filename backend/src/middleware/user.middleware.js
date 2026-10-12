@@ -19,10 +19,17 @@ export const protect = async (req, res, next) => {
     }
 
     req.user = user;
-    console.log("Authenticated user:", req.user?._id);
     next();
     
   } catch (err) {
-    next(err);
+   if (err instanceof jwt.TokenExpiredError) {
+      return next(new AppError("Access token expired", 401));
+    }
+
+    if (err instanceof jwt.JsonWebTokenError) {
+      return next(new AppError("Invalid access token", 401));
+    }
+
+    return next(err);
   }
 };
