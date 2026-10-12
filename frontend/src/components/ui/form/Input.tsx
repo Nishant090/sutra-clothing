@@ -8,7 +8,7 @@ interface InputProps
   id?: string;
   name: string;
   error?: string;
-  hint?: string;
+
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
@@ -20,14 +20,13 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       required = false,
       disabled = false,
       error,
-      hint,
       className = "",
       ...props
     },
     ref
   ) {
     const inputId = id ?? name;
-    const messageId = `${inputId}-message`;
+
 
     return (
       <FormField
@@ -35,7 +34,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         htmlFor={inputId}
         required={required}
         error={error}
-        hint={hint}
+     
       >
         <input
           {...props}
@@ -45,9 +44,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           required={required}
           disabled={disabled}
           aria-invalid={Boolean(error)}
-          aria-describedby={
-            error || hint ? messageId : undefined
-          }
+         
           className={[
             "w-full rounded-lg border bg-white px-3 py-2.5",
             "text-sm text-text-primary placeholder:text-slate-400",

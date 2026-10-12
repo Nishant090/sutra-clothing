@@ -72,6 +72,7 @@ export default function Login() {
           <Input
             {...register("email")}
             label="Email address"
+            
             type="email"
             placeholder="you@example.com"
             autoComplete="email"

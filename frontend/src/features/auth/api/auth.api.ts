@@ -1,4 +1,3 @@
-
 import axios from "axios";
 import { api } from "../../../lib/axios";
 import type { AuthUser } from "../types/auth.type";
@@ -15,16 +14,27 @@ export interface LoginResponse {
 }
 
 export async function loginUser(
-  credentials: LoginCredentials
+  credentials: LoginCredentials,
 ): Promise<LoginResponse> {
   const response = await api.post<LoginResponse>(
     "/api/v1/auth/login",
-    credentials
+    credentials,
   );
 
   return response.data;
 }
 
+export async function getCurrentUser(): Promise<AuthUser> {
+  const response = await api.get<{
+    success: boolean;
+    user: AuthUser;
+  }>("/api/v1/auth/getme");
+ 
+  return response.data.user;
+}
+export async function logoutUser(): Promise<void> {
+  await api.post("/api/v1/auth/logout");
+}
 export function getLoginError(error: unknown): string {
   if (axios.isAxiosError<{ message?: string; Message?: string }>(error)) {
     return (

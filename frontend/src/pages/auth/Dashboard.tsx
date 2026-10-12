@@ -1,11 +1,34 @@
 
+import { useState } from "react";
+import { useNavigate } from "react-router";
 import Button from "../../components/ui/Button";
 import { useAuthStore } from "../../features/auth/store/auth.store";
+import { logoutUser } from "../../features/auth/api/auth.api";
 
 export default function Dashboard() {
-
   const user = useAuthStore((state) => state.user);
+  const logout = useAuthStore((state) => state.logout);
+  const navigate = useNavigate();
 
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [logoutError, setLogoutError] = useState("");
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    setLogoutError("");
+
+    try {
+      await logoutUser();
+      logout();
+      navigate("/login", { replace: true });
+    } catch {
+      setLogoutError(
+        "Unable to contact the server to complete logout. Please try again.",
+      );
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
@@ -23,6 +46,24 @@ export default function Dashboard() {
           <p className="mt-1 font-medium text-text-primary">
             {user?.email}
           </p>
+        </div>
+
+        {logoutError && (
+          <p role="alert" className="mt-4 text-sm text-red-600">
+            {logoutError}
+          </p>
+        )}
+
+        <div className="mt-6">
+          <Button
+            type="button"
+            onClick={handleLogout}
+            disabled={isLoggingOut}
+            isLoading={isLoggingOut}
+            fullWidth
+          >
+            {isLoggingOut ? "Logging out..." : "Logout"}
+          </Button>
         </div>
       </section>
     </main>
