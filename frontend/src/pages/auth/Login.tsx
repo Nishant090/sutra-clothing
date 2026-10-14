@@ -1,9 +1,8 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useNavigate } from "react-router";
-
+import { ROLE_HOME } from "../../features/auth/constants";
 import Input from "../../components/ui/form/Input";
 import Button from "../../components/ui/Button";
 import { loginUser, getLoginError } from "../../features/auth/api/auth.api";
@@ -43,9 +42,7 @@ export default function Login() {
       }
 
       setUser(response.user);
-
-      // Navigate after the backend confirms successful login.
-      navigate("/dashboard", { replace: true });
+    navigate(ROLE_HOME[response.user.role], { replace: true });
     } catch (error: unknown) {
       setServerError(getLoginError(error));
     }
@@ -72,7 +69,6 @@ export default function Login() {
           <Input
             {...register("email")}
             label="Email address"
-            
             type="email"
             placeholder="you@example.com"
             autoComplete="email"
@@ -101,12 +97,7 @@ export default function Login() {
             </p>
           )}
 
-          <Button
-            type="submit"
-            fullWidth
-            size="lg"
-            loading={isSubmitting}
-          >
+          <Button type="submit" fullWidth size="lg" loading={isSubmitting}>
             Sign in
           </Button>
         </form>

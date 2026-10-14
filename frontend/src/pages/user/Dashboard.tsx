@@ -9,6 +9,7 @@ export default function Dashboard() {
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
   const navigate = useNavigate();
+  
 
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [logoutError, setLogoutError] = useState("");
@@ -35,6 +36,9 @@ export default function Dashboard() {
       <section className="w-full max-w-lg rounded-2xl border border-border bg-white p-8 shadow-sm">
         <h1 className="text-3xl font-bold text-text-primary">
           Hi, {user?.name ?? "User"}!
+        
+        </h1>
+        <h1>
         </h1>
 
         <p className="mt-3 text-text-secondary">
