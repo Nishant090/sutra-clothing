@@ -1,12 +1,19 @@
 import * as authServices from "../services/user.services.js";
 import RefreshToken from "../models/refreshToken.model.js";
 import { AppError } from "../utils/appError.js";
+import { registerSchema } from "../schemas/auth.schemas.js";
 
 export const register = async (req, res, next) => {
   try {
-    const { user, accessToken, refreshToken } = await authServices.register(
-      req.body,
-    );
+    const result = registerSchema.safeParse(req.body);
+
+    if (!result.success) {
+      return next(result.error);
+    }
+
+    const validatedData = result.data;
+    const { user, accessToken, refreshToken } =
+      await authServices.register(validatedData);
 
     await RefreshToken.create({
       userId: user._id,
@@ -50,7 +57,7 @@ export const login = async (req, res, next) => {
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
       sameSite: "strict",
-      maxAge: 15* 60 * 1000,
+      maxAge: 15 * 60 * 1000,
     });
 
     res.cookie("refreshToken", refreshToken, {
@@ -89,26 +96,23 @@ export const getMe = async (req, res, next) => {
   try {
     const user = req.user;
 
-    if(!user){
-      throw new AppError("User not authenticated",401)
+    if (!user) {
+      throw new AppError("User not authenticated", 401);
     }
-    console.log(user)
-  
+    console.log(user);
 
-  res.status(200).json({
-    success: true,
+    res.status(200).json({
+      success: true,
       user: {
-      id: user._id.toString(),
-      name: user.name,
-      email: user.email,
-    },
-  });
-    
+        id: user._id.toString(),
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    });
   } catch (error) {
-    next(error)
-    
+    next(error);
   }
-  
 };
 
 export const refresh = async (req, res, next) => {
